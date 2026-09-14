@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+lightgbm
+prophet
+streamlit
+plotly
+dbt-core
+dbt-sqlite
+pytest
+python-docx
