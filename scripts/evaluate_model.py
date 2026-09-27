@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import lightgbm as lgb
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 DATA_DIR = Path("data")
 MODEL_DIR = Path("models")
@@ -38,18 +37,17 @@ def evaluate():
     model = lgb.Booster(model_file=str(model_path))
     val["predictions"] = model.predict(X_val)
 
-    # Evaluation Metrics
-    rmse = np.sqrt(mean_squared_error(y_val, val["predictions"]))
-    mae = mean_absolute_error(y_val, val["predictions"])
-
-    # WAPE (Weighted Absolute Percentage Error)
-    wape = (np.abs(y_val - val["predictions"]).sum() / y_val.sum()) * 100
+    # Performance Metrics calculated via Pure NumPy (bypasses Windows App Control DLL lock)
+    errors = y_val - val["predictions"]
+    rmse = np.sqrt(np.mean(errors ** 2))
+    mae = np.mean(np.abs(errors))
+    wape = (np.sum(np.abs(errors)) / np.sum(y_val)) * 100
 
     print(f"Validation RMSE : {rmse:.4f}")
     print(f"Validation MAE  : {mae:.4f}")
     print(f"Validation WAPE : {wape:.2f}%")
 
-    # Feature Importance Breakdown
+    # Feature Importance (Gain)
     importance = model.feature_importance(importance_type="gain")
     feature_imp = pd.DataFrame({
         "Feature": features,
